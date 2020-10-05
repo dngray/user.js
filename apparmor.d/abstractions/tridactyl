@@ -1,0 +1,49 @@
+# Allow other extensions to be seen
+owner @{HOME}/.mozilla/firefox/*/extensions/* r,
+
+# Used for writing config :mktridactylrc
+owner @{XDG_CONFIG_HOME}/tridactyl/tridactylrc rw,
+
+# Look for python native script
+owner @{HOME}/.local/share/tridactyl/ r,
+owner @{HOME}/.local/share/tridactyl/native_main.py{.new.bak,} rix,
+
+# Check cache
+owner @{XDG_CACHE_HOME}/mozilla/firefox/*/startupCache/scriptCache* r,
+owner @{XDG_CACHE_HOME}/mozilla/firefox/*/startupCache/startupCache.8.little r,
+
+# Check for current instance
+owner @{HOME}/.mozilla/firefox/*/.parentlock rw,
+owner @{HOME}/.mozilla/firefox/profiles.ini r,
+
+# Checks with other browser components
+/usr/lib/firefox{/,/browser/}omni.ja r,
+/usr/lib/firefox/browser/features/* r,
+
+# Allow python
+/usr/bin/python3.[0-9] mr,
+/usr/lib/python3.[0-9]/**.{pyc,so} mr,
+/usr/lib/python3.[0-9]/**.py r,
+/usr/lib/python3.[0-9]{/,/*/} r,
+owner @{HOME}/.local/lib/python3.[0-9]/site-packages/ r,
+/dev/urandom r,
+owner /dev/shm/org.chromium.* r,
+
+# Allow some C things to be mapped
+/etc/ld.so.cache r,
+/usr/lib/ld-*.so r,
+/usr/lib/libc-*.so mr,
+/usr/lib/libpython3.[0-9]m.so.* mr,
+/usr/lib/libpthread-*.so mr,
+/usr/lib/libdl-*.so mr,
+/usr/lib/libutil-*.so mr,
+/usr/lib/libm-*.so mr,
+/usr/lib/libz.so.* mr,
+/usr/lib/libbz2.so.* mr,
+/usr/lib/liblzma.so.* mr,
+/usr/lib/libcrypto.so.* mr,
+/usr/share/zoneinfo/UTC r,
+/usr/lib/locale/locale-archive r,
+/usr/share/locale/locale.alias r,
+/usr/lib/gconv/gconv-modules r,
+

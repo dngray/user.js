@@ -1,0 +1,114 @@
+#include <tunables/global>
+
+# /usr/lib/firefox/firefox flags=( complain ) {
+/usr/lib/firefox/firefox {
+
+	#include <abstractions/pulse>
+	#include <abstractions/nameservice>
+	#include <abstractions/ssl_certs>
+	#include <abstractions/gnome>
+	#include <abstractions/dconf>
+	#include <abstractions/user-download>
+	#include <abstractions/freedesktop.org>
+	#include <abstractions/consoles>
+	#include <abstractions/site/base>
+	#include <abstractions/site/de>
+
+	# Launcher
+	/dev/tty* rw,
+	/usr/{lib/firefox,bin}/firefox rix,
+	/usr/lib/xulrunner/xulrunner-stub ix,
+
+	owner @{HOME}/.mozilla/firefox/** rwk,
+	owner @{XDG_CACHE_HOME}/ rw,
+	owner @{XDG_CACHE_HOME}/mozilla/ rw,
+	owner @{XDG_CACHE_HOME}/mozilla/firefox/ rw,
+	owner @{XDG_CACHE_HOME}/mozilla/firefox/** rwk,
+	owner @{XDG_CACHE_HOME}/gstreamer-*/ rw,
+	owner @{XDG_CACHE_HOME}/gstreamer-*/** rw,
+	owner @{XDG_CACHE_HOME}/thumbnails/** rw,
+
+	# No plugins installed
+	# /opt/netscape/plugins/ r,
+	# /opt/netscape/plugins/** mr,
+	owner @{HOME}/.mozilla/plugins/ r,
+	owner @{HOME}/.mozilla/plugins/** mr,
+	owner @{HOME}/.mozilla/firefox/*/extensions/** m,
+	owner @{XDG_CONFIG_HOME}/firefox/chrome/userChrome.css r,
+	owner @{HOME}/.mozilla/extensions/** mr,
+
+	# Didn't check what this one is for
+	deny @{HOME}/.mozilla/systemextensionsdev/ rw,
+	deny @{HOME}/.mozilla/systemextensionsdev/** rw,
+
+	/etc/mime.types r,
+	/etc/mailcap r,
+	/usr/share/ r,
+	/usr/share/mime/ r,
+	/usr/share/glib-*/schemas/* r,
+	/usr/share/applications/screensavers/ r,
+
+	owner @{HOME}/.local/share/ r,
+	owner @{HOME}/.local/share/applications/ r,
+	owner @{HOME}/.local/share/applications/** r,
+
+	owner @{PROC}/@{pid}/fd/ r,
+	owner @{PROC}/@{pid}/mountinfo r,
+	owner @{PROC}/@{pid}/statm r, # for about:memory
+	owner @{PROC}/@{pid}/task/[0-9]*/stat r,
+	@{PROC}/@{pid}/net/arp r, # for local "network id", to detect changes
+
+	# Load system ca-certificates
+	/etc/ca-certificates/trust-source{/,/**} r,
+
+	# udev
+	/etc/udev/udev.conf r,
+	/sys/devices/**/name r,
+	/sys/devices/**/uevent r,
+	/run/udev/data/* r,
+	/run/mount/utab r,
+	/sys/{bus,class}/ r,
+	/sys/class/{drm,input}/ r,
+	deny /dev/ r,
+	deny /sys/devices/pci**/{config,vendor,device} r,
+
+	# Used in private mode
+	/usr/bin/shred ix,
+
+	# Allowing to change these doesn't seem to be a good idea
+	# And denying it should be harmless
+	deny /{,var/}run/user/*/dconf/user w,
+	deny @{XDG_CONFIG_HOME}/dconf/user w,
+	deny /var/cache/fontconfig/ w,
+	deny @{XDG_CACHE_HOME}/fontconfig/** w,
+	deny /usr/lib/firefox/fonts/** w,
+
+	## Site-local paths
+	# Images in file selection dialogs
+	owner @{HOME}/.thumbnails/** w,
+	# Download handlers
+	owner @{HOME}/.local/bin/wrappers/leech_*.wrapper Ux,
+	# downloads
+	/etc/fstab r,
+
+	# Tridactyl plugin
+	owner @{HOME}/.mozilla/native-messaging-hosts/tridactyl.json r,
+	owner @{HOME}/.local/share/tridactyl/native_main.py rix,
+
+	# Start python in and execute child profile
+	/usr/bin/python3.[0-9] Cx -> tridactylChild,
+
+	profile tridactylChild {
+		include <abstractions/tridactyl>
+	}
+
+	## New e10s profiles
+	/usr/lib/firefox/plugin-container ix, # used to create new tab
+	audit deny /dev/shm/org.chromium.Chromium.* rw, # used by Chromium
+	owner /dev/shm/org.chromium.* rwmk,
+	owner /dev/shm/org.mozilla.ipc.* rw,
+
+	# Needed under Sway
+	@{XDG_RUNTIME_HOME}/mozilla-shared-* rw,
+	/usr/bin/lsb_release Px -> lsb_release,
+}

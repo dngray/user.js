@@ -1,0 +1,13 @@
+#include <abstractions/audio>
+
+# Started on-demand
+/usr/bin/pulseaudio pxrm,
+
+## Site-local symlinks
+/etc/pulse/* r,
+/etc/asound.conf r,
+/etc/pulse/pulse.cookie rk,
+
+/tmp/orcexec.* m,
+owner /run/user/*/orcexec.* rwkm,
+deny owner @{HOME}/orcexec.* m,
